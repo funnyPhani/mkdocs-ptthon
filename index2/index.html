@@ -1,0 +1,587 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.5">
+    
+    
+      
+        <title>hello world - My Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4a0965b7.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#hello-world" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="My Docs" class="md-header__button md-logo" aria-label="My Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            My Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              hello world
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="My Docs" class="md-nav__button md-logo" aria-label="My Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    My Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Welcome to MkDocs
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        hello world
+      </a>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="hello-world">hello world</h1>
+<h1 id="sample">sample</h1>
+<pre><code class="language-python">!pip install pyforest
+import pyforest
+df = sns.load_dataset(&quot;iris&quot;)
+df.head()
+
+display(df['species'].value_counts())
+
+df1 = df[df['species'] == &quot;setosa&quot;].sample(10)
+df2 = df[df['species'] == &quot;versicolor&quot;].sample(2)
+df3 = df[df['species'] == &quot;virginica&quot;].sample(5)
+df4 = pd.concat([df1,df2,df3])
+df4.reset_index(drop=True,inplace=True)
+df4['species'].value_counts()
+
+from imblearn.over_sampling import SMOTE
+over_sampler = SMOTE(k_neighbors=1)
+X_bal, y_bal = over_sampler.fit_resample(df4.iloc[:,:-1], df4.iloc[:,-1])
+
+display(y_bal.value_counts())
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest = train_test_split(X_bal,y_bal,test_size=0.2,random_state=25)
+from sklearn.linear_model import LinearRegression
+lr = LogisticRegression()
+lr.fit(xtrain,ytrain)
+ypred = lr.predict(xtest)
+from sklearn.metrics import confusion_matrix,classification_report,accuracy_score
+confusion_matrix(ytest,ypred)
+accuracy_score(ytest,ypred)
+print(classification_report(ytest,ypred))
+sns.heatmap(confusion_matrix(ypred,ytest),annot = True,xticklabels = df4['species'].unique(),yticklabels = df4['species'].unique());
+</code></pre>
+<pre><code class="language-python">try:
+    import os
+    os.makedirs(&quot;repImg&quot;,exist_ok=True)
+    import urllib      
+    import requests
+    from bs4 import BeautifulSoup
+    import warnings
+
+    def downloadImage(url,name):
+        urllib.request.urlretrieve(url,name)
+
+    warnings.filterwarnings(&quot;ignore&quot;)
+    url = &quot;https://indianrecipes.com/new_and_popular&quot;
+#     url = f&quot;https://indianrecipes.com/api?tm={time.time()}&quot;
+    req = requests.get(url).content
+    soup = BeautifulSoup(req,&quot;html.parser&quot;)
+    data = soup.findAll(&quot;div&quot;,attrs={&quot;class&quot;:&quot;links group&quot;})
+    for i in data:
+        for j in i.findAll(&quot;a&quot;,{&quot;class&quot;:&quot;group&quot;}):
+            for n in j.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;text&quot;}):
+                print(n.text.strip())
+                try:
+                    os.makedirs(os.path.join(&quot;repImg&quot;,n.text.strip()),exist_ok=True)
+                except Exception as e:
+                    print(&quot;error occured :&quot;,e)
+            print(&quot;https:&quot;+j.get(&quot;href&quot;))
+            purl = &quot;https:&quot;+j.get(&quot;href&quot;)
+            for k in j.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;image&quot;}):
+                for l in k.findAll(&quot;picture&quot;):
+                    for m in l.findAll(&quot;source&quot;):
+                            print(&quot;https:&quot;+m.get(&quot;srcset&quot;))  
+                            img = &quot;https:&quot;+m.get(&quot;srcset&quot;)
+                            downloadImage(img,f&quot;repImg/{n.text.strip()}/{n.text.strip()}.jpg&quot;)
+
+            req1 = requests.get(purl).content
+            soup1 = BeautifulSoup(req1,&quot;html.parser&quot;)
+            data1 = soup1.findAll(&quot;div&quot;,{&quot;class&quot;:'instructions'})
+            d = &quot;&quot;
+            for o in data1:
+                d+=o.text.strip()
+                d = &quot;&quot;.join(d).strip().replace(&quot;\n&quot;,&quot; &quot;)
+                print(d)
+            with open(f&quot;repImg/{n.text.strip()}/{n.text.strip()}.txt&quot;,&quot;w&quot;) as f:
+                f.writelines(f&quot;Name :{n.text.strip()}&quot;+&quot;\n&quot;)
+                f.writelines(f&quot;URL :{purl}&quot;+&quot;\n&quot;)
+                f.writelines(f&quot;ImageURL :{img}&quot;+&quot;\n&quot;)
+                f.writelines(f&quot;Description :{d}&quot;+&quot;\n&quot;)
+
+            print(&quot;-&quot;*95)
+except Exception as e:
+    print(&quot;error occured :&quot;,e)
+</code></pre>
+<pre><code class="language-python">
+# Day-1 web-scrapping
+try:
+    !pip install bs4
+    import requests
+    from bs4 import BeautifulSoup
+    url = &quot;https://indianrecipes.com/&quot;
+    # get the data from the url
+    req = requests.get(url).content
+    # parser the content from the requested url
+    soup = BeautifulSoup(req,&quot;html.parser&quot;)
+#     print(soup.prettify())
+    data = soup.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;links group&quot;})
+#     print(data.text)
+    for i in data:
+        for j in i.findAll(&quot;a&quot;,{&quot;class&quot;:&quot;group&quot;}):
+            print(&quot;Dish Name :&quot;,j.text.strip())
+            print(&quot;URL :&quot;,&quot;https:&quot;+j.get(&quot;href&quot;))
+            for k in j.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;image&quot;}):
+                for l in k.findAll(&quot;picture&quot;):
+                    for m in l.findAll(&quot;source&quot;):
+                        print(&quot;Image URL :&quot;,&quot;https:&quot;+m.get(&quot;srcset&quot;))
+                        break
+                    print(&quot;-&quot;*105)
+except Exception as e:
+    print(&quot;error occured :&quot;,e)
+
+</code></pre>
+<pre><code class="language-python"># Day-2 web-scrapping
+try:
+#     !pip install bs4
+    import requests
+    import os
+    from bs4 import BeautifulSoup
+    import urllib
+     # new folder syntax
+#     os.makedirs(&quot;vantalu&quot;,exist_ok=True)
+
+    def downloadImage(url,name):
+        urllib.request.urlretrieve(url,name)
+    url = &quot;https://indianrecipes.com/new_and_popular&quot;
+#     url = &quot;https://indianrecipes.com/&quot;
+    # get the data from the url
+    req = requests.get(url).content
+    # parser the content from the requested url
+    soup = BeautifulSoup(req,&quot;html.parser&quot;)
+#     print(soup.prettify())
+    data = soup.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;links group&quot;})
+#     print(data.text)
+    for i in data:
+        for j in i.findAll(&quot;a&quot;,{&quot;class&quot;:&quot;group&quot;}):
+            print(&quot;Dish Name :&quot;,j.text.strip())
+            os.makedirs(os.path.join(&quot;vantalu&quot;,j.text.strip()),exist_ok=True)
+            print(&quot;URL :&quot;,&quot;https:&quot;+j.get(&quot;href&quot;))
+            for k in j.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;image&quot;}):
+                for l in k.findAll(&quot;picture&quot;):
+                    for m in l.findAll(&quot;source&quot;):
+                        print(&quot;Image URL :&quot;,&quot;https:&quot;+m.get(&quot;srcset&quot;))
+                        downloadImage(&quot;https:&quot;+m.get(&quot;srcset&quot;),f&quot;vantalu/{j.text.strip()}/{j.text.strip()}.jpg&quot;)
+                        break
+                    print(&quot;-&quot;*105)
+except Exception as e:
+    print(&quot;error occured :&quot;,e)
+</code></pre>
+<pre><code class="language-python">try:
+    import requests
+    from bs4 import BeautifulSoup
+    req = requests.get(&quot;http://books.toscrape.com/&quot;).content
+    soup = BeautifulSoup(req,&quot;html.parser&quot;)
+    data = soup.findAll(&quot;li&quot;,{&quot;class&quot;:&quot;col-xs-6 col-sm-4 col-md-3 col-lg-3&quot;})
+#     print(data)
+    for i in data:
+        for j in i.findAll(&quot;a&quot;):
+            print(&quot;http://books.toscrape.com/&quot;+j.get(&quot;href&quot;))
+            burl = &quot;http://books.toscrape.com/&quot;+j.get(&quot;href&quot;)
+            break
+#         for k in i.findAll(&quot;h3&quot;):
+#             print(k.text)
+#             break
+        req1 = requests.get(burl).content
+        soup1 = BeautifulSoup(req1,&quot;html.parser&quot;)
+        data2 = soup1.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;col-sm-6 product_main&quot;})
+        for i in data2:
+            for j in i.findAll(&quot;h1&quot;):
+                print(j.text.strip())
+
+        data2 = soup1.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;item active&quot;})
+        for l in data2:
+            for m in l.findAll(&quot;img&quot;):
+                print(&quot;http://books.toscrape.com/&quot;+m.get(&quot;src&quot;))
+#                 print(&quot;-&quot;*25)
+        data3 = soup1.findAll(&quot;p&quot;)
+        for i in data3:
+            print(i.text.strip())
+        print(&quot;-&quot;*25)
+except Exception as e:
+    print(&quot;error occured :&quot;,e)
+</code></pre>
+<pre><code class="language-python">try:
+    import pyforest
+    import requests
+    from bs4 import BeautifulSoup
+    import warnings
+    warnings.filterwarnings(&quot;ignore&quot;)
+    url = &quot;https://timesofindia.indiatimes.com/topic/category-wise/news&quot;
+    intrest = input(&quot;enter ur category&quot;)
+    url = f&quot;https://timesofindia.indiatimes.com/topic/{intrest}&quot;
+    req = requests.get(url)
+#     print(req)
+    soup = BeautifulSoup(req.content,&quot;html.parser&quot;)
+    data = soup.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;Mc7GB&quot;})
+    D = {}
+    for pk,i in enumerate(data):
+        d = {}
+        for j in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;EW1Mb _3v379&quot;}):
+#             print(&quot;Title :&quot;,j.text.strip())
+            d[&quot;title&quot;] = j.text.strip()
+        for k in i.findAll(&quot;a&quot;):
+#             print(&quot;URL :&quot;,k.get(&quot;href&quot;))
+            d[&quot;URL&quot;] = k.get(&quot;href&quot;)
+        for l in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;_13Z9I&quot;}):
+            for m in l.findAll(&quot;img&quot;):
+#                 print(&quot;Image URL :&quot;,m.get(&quot;src&quot;))
+                d[&quot;Image URL&quot;] = m.get(&quot;src&quot;)
+        for n in i.findAll(&quot;p&quot;,{'class':'itdvH _3v379'}):
+#             print(&quot;Description :&quot;,n.text.strip())
+            d[&quot;Description&quot;] = n.text.strip()
+        for o in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;hVLK8&quot;}):
+#             s = o.text.strip()
+#             s = s.split(&quot;/&quot;)[1].strip()
+            d['Time'] = o.text.strip()
+#             del s
+#             print(&quot;-&quot;*160) 
+        D[pk] = d
+        del d
+    print(&quot;sample of DataSet :&quot;)
+    print(&quot;-&quot;*165)
+    display(pd.DataFrame(D).T.head(2))
+    print(f&quot;{intrest} data fetched successfully.&quot;)
+    print(&quot;-&quot;*165)
+except Exception as e:
+    print(&quot;error occured :&quot;,e)
+</code></pre>
+<pre><code class="language-python">try:
+  import pyforest
+  import requests
+  from bs4 import BeautifulSoup
+  import warnings
+  warnings.filterwarnings(&quot;ignore&quot;)
+  url = &quot;https://timesofindia.indiatimes.com/topic/category-wise/news&quot;
+#   intrest = input(&quot;enter ur category&quot;)
+#   url = f&quot;https://timesofindia.indiatimes.com/topic/{intrest}&quot;
+  req = requests.get(url)
+#     print(req)
+  soup = BeautifulSoup(req.content,&quot;html.parser&quot;)
+  data = soup.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;Mc7GB&quot;})
+  D = {}
+  for pk,i in enumerate(data):
+      d = {}
+      for j in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;EW1Mb _3v379&quot;}):
+#             print(&quot;Title :&quot;,j.text.strip())
+          d[&quot;title&quot;] = j.text.strip()
+      for k in i.findAll(&quot;a&quot;):
+#             print(&quot;URL :&quot;,k.get(&quot;href&quot;))
+          d[&quot;URL&quot;] = k.get(&quot;href&quot;)
+          turl = k.get(&quot;href&quot;)
+          req1 = requests.get(turl).content
+          soup1 = BeautifulSoup(req1,&quot;html.parser&quot;)
+          for i2 in soup1.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;_3YYSt clearfix&quot;}):
+                d[&quot;longDescription&quot;] = i2.text.strip()
+#               print(i.text.strip())
+      for l in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;_13Z9I&quot;}):
+          for m in l.findAll(&quot;img&quot;):
+#                 print(&quot;Image URL :&quot;,m.get(&quot;src&quot;))
+              d[&quot;Image URL&quot;] = m.get(&quot;src&quot;)
+      for n in i.findAll(&quot;p&quot;,{'class':'itdvH _3v379'}):
+#             print(&quot;Description :&quot;,n.text.strip())
+          d[&quot;Description&quot;] = n.text.strip()
+      for o in i.findAll(&quot;div&quot;,{&quot;class&quot;:&quot;hVLK8&quot;}):
+#             s = o.text.strip()
+#             s = s.split(&quot;/&quot;)[1].strip()
+          d['Time'] = o.text.strip()
+#             del s
+#             print(&quot;-&quot;*160) 
+      D[pk] = d
+      del d
+
+  print(&quot;sample of DataSet :&quot;)
+  print(&quot;-&quot;*165)
+  display(pd.DataFrame(D).T.head(2))
+
+  print(f&quot;{intrest} data fetched successfully.&quot;)
+  print(&quot;-&quot;*165)
+except Exception as e:
+  print(&quot;error occured :&quot;,e)
+</code></pre>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Welcome to MkDocs" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Welcome to MkDocs
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.85cb4492.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.431f3d41.min.js"></script>
+      
+    
+  </body>
+</html>
