@@ -1,0 +1,972 @@
+%\documentclass[conference]{IEEEtran}
+\documentclass[preprint,review,12pt]{elsarticle}
+%\textwidth=18cm
+%\texthigh=25cm
+\usepackage[margin=0.9in]{geometry}
+\usepackage{pdfpages}
+%\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{subfig}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+\newdefinition{definition}{Definition}
+\newproof{pf}{Proof}
+\newproof{pot}{Proof of Theorem \ref{thm2}}
+
+\journal{Future Generations Computer Systems}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{cases}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{verbatim}
+\usepackage{mathtools}
+\usepackage{soul}
+\usepackage{multirow}
+%\usepackage{pdfcomment}
+%\usepackage{CJKutf8}
+
+
+
+
+
+\begin{document}
+	
+	\section{Abstract}\label{sec:abstract}
+	In this paper, we present a reinforcement learning-based Abstractive image-text summarization with fine-tuned-transformer BERT (RLAST). In the RLAST, as the agent, we use an encoder-decoder-based transformer with fine-tuned attention function to generate the multi-modal summary for the input news article. An input news article (article for short) contains the text with the associated images. We propose an image-text similarity (ITS) measurement approach as the environment to reward the multi-modal summarized output obtained from the agent. To evaluate the performance of the RLAST we use the data from two publicly available multi-modal datasets: the CNN-DailyMail dataset and the IndiaToday dataset. Our experimental results show that the RLAST produces better ROUGE metrics when compared with the Sequence-to-Sequence (seq-to-seq) summarization approach, the multi modal summarization with bi-directional transformers, and the summarization with pretrained encoders approaches. 
+	
+	\textbf{Keywords:} abstractive multi-modal summarization; fine-tuned transformers; image-text similarity; reinforcement learning
+	
+\section{Introduction}\label{sec:Info}	
+Summarization is a task of representing the input data in the shorter version to the individuals without losing the context of the input data \cite{1,2,3}. The summarization approaches extract the sequence of keywords from the input data for generating the output summary. In this work, we correlate the summarization task as the sequential decision-making problem; where the summarization approach should make a decision on how to represent the sequence of input data in shorter version by maintaining the context of input data.  Most of the existing summarization approaches focus on single-modal summarization (SS) approaches such as the text-based summarization.  In the SS approaches, the input data and the output summary are of same modality \cite{4,5,6,7}. However, the individuals use the multi-modal data (such as audio, image, text, video) to describe a topic clearly \cite{8,9}. As a result, the existing SS approaches fail to generate qualitative summary from the multi-modal input (MI) data (a.k.a. input data which contains multi-modal data). 
+
+To overcome these limitations, researchers proposed the multi-modal summarization (MS) approaches \cite{10,11,12,13,14} for summarizing the MI data. The MS approaches generate the output summary by extracting the latent features from the MI data. In \cite{14}, the authors introduced the bi-directional encoder representations from transformers (BERT) generate the text-based output summary from the MI data. They used the BERT for extracting the latent features from the textual data presented in the MI data. This approach do not explore the semantic gap presented in the different modalities of the MI data. Whereas, in \cite{15,16}, the authors combined two deep learning approaches: the convolutional neural networks (CNNs) and the transformers to generating the multi-modal output (MO) summary for the MI data. They proved that the MO summary can improve the individual's understandability instead of generating the text-based output summary. They used the CNNs to extract the latent features from the images presented in the MI data. Similarly, they used the transformers to extract the latent features from the textual content presented in the MI data. Later, the combined the latent features from the images and the textual content of the MI data to generate the MO summary. 
+
+Although the the existing approaches generate MO summary, they lack the mechanism of transferring the knowledge from an existing model to create a new model (which consists of new data). In these approaches, when there are new data we need to retrain the entire system from the beginning. To overcome this limitation, we investigate into usage of Transfer learning (TL) mechanism for the MS. To the best of our knowledge, few researchers focus incorporating the TL mechanism into the MS for generating MO summary from the MI data. In \cite{17}, authors proposed the Residual Network with $48$ convolutional layers, $1$ maxpool layer, and $1$ average pool layer (ResNet50) to provide TL mechanism in image classification. They used the ResNet50 as pre-trained model for transferring the latent features of images (presented in ImageNet dataset) to create new model for classifying new images. In \cite{18}, authors propose the Reinforcement Learning (RL) approach for providing TL mechanism to address the sequential decision-making problem, where the environment rewards the based on the output generated by the agent.  
+
+In this paper, we propose the RL based multi-modal summarization (RLMS) approach for generating the MO summary from the MI data which consists of image and the textual data. The RLMS approach consists of two modules, the agent module and the environment module as shown in Figure~\ref{fig:1}. 
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=150mm]{mainarc10-crop.pdf}
+	\caption{System Architecture of the RLMS approach.} 
+	\label{fig:1}
+\end{figure*}
+In the agent module, we fine-tune the ResNet50 approach by adding $2$ BiLSTM layers at the end of the ResNet50 approach. The BiLSTM layers in the fine-tuned ResNet50 approach will produce the text embeddings for the images presented in the MI data. We use the word embedding, positional embeddings, and the segment embedding to extract the textual embeddings for the text presented in the MI data. The agent module use the fine-tuned transformers to generate the text required for the MO summary from the text embeddings obtained from the images and text presented in the MI data. The environment module uses the text context similarity (TCS) approach and the image selector (IS) approach to evaluate the output generated by the agent module. The TCS approach uses the ROUGE score (as an evaluation metric) to measure the contextual similarity between the text required for the MO summary and the text presented in the MI data. If the ROUGE score is greater than the threshold $\phi$, then IS approach selects an image from the MI data based on the text in the MO summary. The IS approach uses the text embedding of images to extract the appropriate image based on the context of the text in the MO summary. If the ROUGE score is less than the threshold $\phi$, the TCS approach propagates the error ($\xi$) to the agent module. Based on the $\xi$, the agent module retrains the fine-tuned transformers to generate the new text required for the MO summary. Finally, the RLMS approach combines the image (obtained from the IS approach) with the text required for the MO summary (obtained from the TCS approach) to generate the MO summary for the MI data. 
+
+To train and test performance of the RLMS approach, we use the data from the publicly available datasets such as the CNN/DailyMail dataset \cite{19}, the InShorts dataset \cite{20}, and the IndiaToday dataset \cite{21}. We use the Seqeuence-to-Sequence (S2S) approach \cite{}, the pre-trained encoders approach \cite{}, and the multi-modal summarization with bi-directional encoder representation for transformers (MS with BERT) approach \cite{} to evaluate the performance of the RLMS approach. We organize our paper as follows. In Section~\ref{sec:Survey}, we discuss the literature works along with there limitations. We present the system architecture of the RLMS in Section~\ref{sec:model}. Similarly, we show the performance of the RLMS approach in the Section~\ref{sec:Results}. Finally, conclude the paper in Section~\ref{sec:conclusion}.  
+	
+\section{Related Work}\label{sec:Survey}
+		\begin{comment}
+		As discussed in Section~\ref{sec:Info}, we categorize the existing summarization techniques into SS techniques and the MS techniques. In Section~\ref{ss}, we discuss the existing SS techniques such as the text-based summarization and the image-based summarization. Similarly, in Section~\ref{ms}, we present the existing MS techniques.  
+		In this Section, we present the literature work on the SS approaches and the MS approaches. 
+		\subsection{Single-modal summarization}\label{ss}
+		\end{comment}
+ Most of the existing SS approaches are the text-based summarization approaches \cite{20,21,22,23,24,25,26}. The text-based summarization approaches can be classified into extractive summarization approaches \cite{20,21,22,23} and the abstractive summarization approaches \cite{24,25,26}. The goal of the extractive summarization is to extract the key phrases or the sentences from original documents. In [20], the authors proposed an automatic text summarization technique using the weighted word vector representation and the TF-IDF. This approach uses the weighted word vector representation for extracts the context from the input data. Based on the context, the TF-IDF approach generates the output summary for the input document. In [21], the authors introduced the graph-based summarization approach for generating extractive summary for the input document. In this approach, they represent an input document as an input-graph where each sentence of the input document represents a node in the input-graph. The weights are provided to the edges of the input-graph to rank the sentences presented in the input document. In [22], the authors proposed an extractive summarization approach using the LSTM for generating the summary from the input document. In this approach, the LSTM uses an attention function to extract the keywords presented in the input document. In [23], the authors presented the problem of summarizing multiple documents as the binary optimization problem. They proposed a self-adaptive quantum-inspired genetic algorithm technique for summarizing multiple input documents. The extractive summarization approaches are limited to use the words or sentences presented in the input document. As a result, most of the extractive summarization approaches contain duplicate words or grammatically incorrect sentences. 
+
+Researchers introduce the abstractive summarization approaches \cite{24,25,26} to solve the shortcomings of the extractive summarization. The abstractive summarization approaches uses the words that may (or) may not present in the input document to generate the summary. In [24], the authors propose an abstractive summarization approach using the Bi-directional LSTM (BiLSTM) approach. This approach uses a local attention mechanism in the BiLSTM for extracting the context of the input document. Based on the context, BiLSTM chooses the words from the dictionary to generate an abstractive summary from the input document. In [25], the authors introduced a sequence-to-sequence (S2S) approach for generating abstractive summary from the input document. This technique is combination of the encoder and the decoder network based Pointer-generator networks. In [26], the authors proposed the pre-trained encoders approach for generating abstractive summary from the input document. The pre-trained encoders approach contains a document level encoder based on BERT for extracting the semantics presented in the input document. They fine-tuned the BERT for generating the abstractive summary from text presented in the input document. In this paper, we use the S2S approach and the pre-trained encoders approach to evaluate the performance of the RLMS approach. 
+		
+\begin{comment}
+		[21]https://www.sciencedirect.com/science/article/abs/pii/S0957417421012264
+		[22]https://link.springer.com/article/10.1007/s12652-020-02591-x
+		[23]https://www.sciencedirect.com/science/article/abs/pii/S0957417420311994
+		Abstractive
+		[25]https://dl.acm.org/doi/pdf/10.1145/3419106
+		[26]See, Hear, Read: Leveraging Multimodality with Guided Attention for Abstractive Text Summarization
+		[27]https://direct.mit.edu/coli/article/47/4/813/106774/Abstractive-Text-Summarization-Enhancing-Sequence
+		
+		Image:
+		[]https://proceedings.neurips.cc/paper/2014/hash/a8e864d04c95572d1aece099af852d0a-Abstract.html
+		[]https://link.springer.com/article/10.1007/s00500-021-06603-6
+		
+		MM
+		[]https://ieeexplore.ieee.org/abstract/document/8387512?casa_token=D_O9ChwY2foAAAAA:JAm5zKGDs2l2NTpaV2JME-WJ447aoUxt7Hc6XM6UHZBV4liEsDKstzOR6eFRPYGDNRF5VBuOAYI
+		[]https://dl.acm.org/doi/abs/10.1145/3445794?casa_token=bGnkCycID1UAAAAA:-AfuJqhJJviC4moI3oOQHkvhuKd9-lc-9oQX1OlY2uA5UI25-1aHc__B_AqY3pM3RtIfQeucCO0I4Q
+		[]https://ieeexplore.ieee.org/abstract/document/9552250?casa_token=6ibk4Bl4zR8AAAAA:XHK5IDaLysSut-Qhb-Nz39T1nLlc24XfzxauCU2JpL3WPMYQbxmwM9bFXSE13XBSytsT9TBaeWw
+		[]
+		
+		
+		
+		
+\textbf{Image summarization} is a technique in which, the individuals will get the subsequent version of an image from the set of input images. In [27], the authors provided the necessity properties of an image to capture feature vectors such as namely coverage and similarity. These properties extract the latent features from an input image. In [28], the authors proposed the semantic information and the self-supervision mechanisms. In this approach the researchers used GAN to generate feature vectors and k-mean clustering to extract the similar examples which are nearest to the centroid. They acquire significant representation of the dataset using this mechanism.
+\end{comment} 
+
+To overcome the limitations of the SS approaches, researchers propose the MS approaches. In MS approaches, researchers extract the latent features presented in different modalities of the MI data \cite{27, 28, 29, 30}.  In \cite{27}, the authors presented a graph-based neural network approach to capture the semantic variations present in the MI data. This approach uses the semantic variations to generate extractive summarization from the MI data. Whereas, in \cite{28}, the authors proposed an unsupervised graph-based MS approach for generating multi-modal summary from the MI data. This approaches uses a text-image similarity mechanism to measure the semantic similarity between the text and the image presented in the MI data. In \cite{29}, the authors introduced a multi-modal beam search algorithm for summarizing the MI data. This algorithm uses an attention based encoder-decoder BiLSTM mechanism to generate extractive summary from the MI data. In \cite{30}, the authors proposed bi-hop attention using the late fusion mechanism to generating MO summary from the MI data. This mechanism uses the ResNet and BiLSTM for bridging the gap between the video and textual content presented in the MI data.
+
+In the existing approaches, when there are new data we need to retrain the entire system from the beginning. They lack the mechanism of transferring the knowledge from an existing model to create a new model (trained on the new data). Therefore, in the RLMS approach, we introduce the RL approach to add TL mechanism for generating MO summary from the MI data. We discuss the system architecture of the RLMS approach in Section~\ref{sec:model}.
+
+	
+\section{Proposed Model}\label{sec:model}
+
+In this section, we describe the system architecture of the RLMS approach. In Section ~\ref{sec:agent}, we present the working of the agent module of the RLMS approach.  Functionality of the agent module is to generate text required for the MO summary by exploring the semantic gap presented in the different modalities of the MI data. In the Section~\ref{sec:environment}, we evaluate the output of the agent module in the environment module of the RLMS approach. 
+
+
+\begin{comment}
+The RLMS approach consists of two modules, the agent module and the environment module. In Section ~\ref{sec:agent}, we present the mathematical model of the agent module. The functionality of the agent module is to generate the MO summary by exploring the semantic gap presented in the different modalities of the MI data. In this paper, we focus on MI data which consists of images and text data. Whereas, the functionality of the environment module is to reward the MO summary generated by the Agent module. If the reward is greater than the threshold ($\phi$), then the MO summary is given to the user. Else, the environment module retrains the agent module by updating the weights of the model based on the error ($\xi$).
+
+
+In Section ~\ref{sec:environment}, we discuss the working ITS mechanism to rewarding the MO summary as part of the environment module. 
+
+
+
+
+The ROUGE metric compares the context of the MO summary with the context of the MI data to generate the reward between the range $[0-1]$. We use the ITS mechanism for rewarding the MO summary obtained from the agent module as described in Section . The RLMS consists 3 main modules such as, image module, text module, and ITS module.
+
+\end{comment}
+	
+\subsection {RLMS Agent Module}\label{sec:agent}
+
+Let $I = \{i_1, i_2, \ldots, i_n\}$ represent the set of images in the MI data, where $|I| = n$ is the size of $I$. The agent module comprises of the image feature extractor (IFE) module, the text feature extractor (TFE) module, and the fine-tuned transformer module. In the IFE module, we fine-tune the ResNet50 neural network (RN) model to extract the image-to-text embedding from the images presented in the MI data. The RN model comprises of $48$ CNN layers, $2$ BiLSTM layers, and $1$ Word2Vec layer as shown in Figure~\ref{fig:2}. 
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=125mm]{model_1-crop.pdf}
+	\caption{Image Feature Extractor (a.k.a. Fine-tuned ResNet50 approach).} 
+	\label{fig:2}
+\end{figure*}
+In the RN model, we use the CNN layers to extract the latent image feature vector set $V_I = \{ V_1, V_2, \ldots, V_n\}$ from $I$. Note that, $V_k$ represents the latent image feature vector for $i_k$, where $i_k \in I$.  The BiLSTM layers of the RN model derive the textual description set $C = \{ C_{V_1}, C_{V_2}, \ldots, C_{V_n}\}$ from $V_I$. 
+
+In the agent module, we append $C$ with the text presented in the MI data. This reduces the semantic gap presented in the image and text data presented in the MI data. Suppose that we represent the text presented in the MI data with a list $S = (S_1, S_2, \ldots, S_m)$ of $m$ sentences. Let $U=\{w_1, w_2, \ldots, w_c\}$ represent the universal set of all words for all sentences in $S$. Note that,  $S_l = (w_a, w_b, \ldots, w_g) $ represents the list of $g$ words in sentence $l$ and $|S_l|$ represents the size of $S_l$. For example, $S_l = (w_1, w_2, w_5, w_3, w_{12})$ denote that the sentence $l$ consists of $5$ words, $w_1$, $w_2$, $w_5$, $w_3$, and $w_{12}$. The TFE module extract the text embeddings (TE) from $S$ based the word embeddings (WE) $\forall$ $w_j \in U$, the position embeddings (PE) of the word in a sentence, and the sentence embeddings (SE) $\forall$ $S_l \in S$. Here, the WE, the PE, and the SE preserves the context of $S$. The TFE module uses the Word2Vec technique to extract the WE set $V_W = \{V_{w_1}, V_{w_2}, \ldots, V_{w_c}\}$ $\forall$ $w_j \in U$. The Word2Vec technique represents $w_j$ in a dimension vector of size $d$, i.e., $|V_{w_j}| = d$. Note that, the context of $w_j$ in $S_l$ depends on the position where $w_j$ is presented in $S_l$. The PE of $w_j$ in $S_l$ represents the relationship of $w_j$ at all desirable positions $F = \{0, 1, \dots, |S_l|-1\}$ in $S_l$.  In the TFE module, we calculate $p_{l_j}$ as vector containing the PE of $w_j$ in $S_l$ using
+\begin{equation}  \label{eq1}
+	\begin{aligned}
+	p_{l_j} = \{ p: p = \rho(j,f); 0 \le f\le |S_l|-1 \text{  },  \forall \text{  }  f\in F\}, \\
+	\rho(j,f)=
+		\begin{cases}
+			\sin(j / \alpha ^ {(2f/d)}), \text {if $f$ is even}, \\
+			\cos(j / \alpha ^ {(2f/d)}), \text {if $f$ is odd},\\
+		\end{cases}
+	\end{aligned}
+\end{equation}
+where $\alpha$ ranges between $[2\pi, 2\pi.d]$. Note that, $p_{l_j}$ preserves the context of the $w_j$ for different desirable positions in $S_l$. Let $V_{P_l} = \{p_{l_a}, p_{l_b}, \ldots, p_{l_g}\}$ be the PE set $\forall$ $w_j \in S_l$. Thereby, we obtain $P_S = \{V_{P_1}, V_{P_2}, \ldots, V_{P_m}\}$ as the PE set $\forall$ $S_l \in S$. Moreover, we observe that if we change the position of the $S_l$ in $S$, then the context of the $S$ also changes. In the TFE module, we use the SE to encode the context of sentences in $S$ as vectors. Let $s_{l_j}$ denote the vector to represent the SE of $w_j$ in $S_l$ as 
+\begin{equation}  \label{eq2}
+	\begin{aligned}
+	s_{l_j} =  \{ s : s = \beta(j,l);  \forall \text{  }  w_j \in S_l\} \\
+	\beta(j,l)=
+		\begin{cases}
+			V_{A},                 \text {if $l$ is odd}, \\
+			V_{B},                 \text {if $l$ is even} . \\
+		\end{cases}
+	\end{aligned}
+\end{equation}
+ Let $V_{S_l} = \{s_{l_a}, s_{l_b}, \ldots, s_{l_g}\}$ be the SE set $\forall$ $w_j \in S_l$. Thereby, we obtain $V_S = \{V_{S_1}, V_{S_2}, \ldots, V_{S_m}\}$ as the SE set $\forall$ $S_l \in S$. To preserve the ordering of the words in $S_l$, we make the dimensions of the  $p_{l_j}$ and $s_{l_j}$  same as $V_{w_j}$ , i.e.,  $|p_{l_j}| = |s_{l_j}| = d$. In the TFE module, we represent the TE $t_{l_j}$  for $w_j$ in $S_l$ by word-wise addition of $V_{w_j}$, $p_{l_j}$, and $s_{l_j}$ as $t_{l_j} =  ( V_{w_j} + p_{l_j} + s_{l_j} )$. Similarly, we obtain $T_l = \{t_{l_a}, t_{l_b}, \ldots, t_{l_g}\}$ be the TE $\forall$ $w_j \in S_l$. Finally, we derive $X = \{T_1, T_2, \ldots, T_m\}$ as the TE $\forall$ $S_l \in S$.
+
+ In the agent module, we use the fine-tune the transformer to generate the text required for the MO summary from $X$ as shown in Figure~\ref{fig:1}. The fine-tune transformer consists of encoder networks, decoder networks, and a summarization layer $(SL)$. The encoder networks is a stack of $N_e$ encoders where each encoder comprises of the multi-head attention (MHA) layer and the point-wise-feed-forward network (PFFN) as shown in Figure~\ref{fig:3}.
+	\begin{figure}	
+	\begin{center}		
+		\subfloat[]{{\includegraphics[width=2.5cm,height=8cm]{EN10-crop.pdf} }}
+		\qquad
+		\qquad
+		\qquad
+		\subfloat[]{{\includegraphics[width=4.70cm,height=8cm]{MHA10-crop.pdf} }}
+		\qquad
+		\qquad
+		\qquad
+		\subfloat[]{{\includegraphics[width=4.0cm,height=8cm]{prelu-1-crop.pdf} }}
+	\end{center}
+	\vspace*{-\baselineskip}
+	\caption{(a) Encoder network, (b) Encoder MHA, (c) PFFN. } 
+\end{figure}
+The MHA layer is a stack of $k$ self-attention layers, where each self-attention layer parallelly helps in providing the attention to important words in each sentence. For better understanding of the MHA layer, we will discuss the working of one self-attention layer. At self-attention layer $e$, we create the query vector ($Q_e^l$), the key vector ($K_e^l$), and the value vector ($R_e^l$), for each in $T_l \in X$ as
+\begin{equation}
+	\begin{aligned}
+	Q_e^l = T_l * W_e^Q,\\
+	K_e^l = T_l  * W_e^K,\\
+	R_e^l = T_l * W_e^R,\\
+		\end{aligned}
+\end{equation}
+where $W_e^Q$, $W_e^K$, and $W_e^R$ are the trainable weight matrices (obtained during the training phase). Let $D$ represent the dimensions of $Q_e^l$, $K_e^l $, and $R_e^l $. We use the softmax function to obtain the score $s_e^l$ for $T_l \in X$ at self-attention layer $e$ as  
+\begin{equation}
+	\begin{aligned}
+		s_e^l = \text{softmax}\left(\frac{Q_e^l * (K_e^l)^T }{\sqrt{D}}\right)*R_e^l.
+	\end{aligned}
+\end{equation}
+Finally, we concatenate ($\oplus$) the scores from all the self-attention layers to produce output $Z^l$ of the MHA layer for $T_l \in X$ as  
+\begin{equation}
+	Z^l = [s_1^l \oplus s_2^l \ldots \oplus s_k^l] * W^k,
+\end{equation}
+where $W^k$ is the trainable weight matrix (obtained during the training phase). In the fine-tuned transformers, we use the two layer normalization (LN) operation with residual connections to stabilize the outputs of the MHA and the PFFN layers \cite{LN, arxiv.org/pdf/2002.04745.pdf} \cite{LN}. Let $\hat{Z^l}$ denote the output of the LN operation applied on $Z^l$. In the PFFN, we use two linear layers and the PReLU activation function ($\phi()$). The $\phi()$ preserves the values with negative gradients in $\hat{Z^l}$ as 
+\begin{equation}  \label{eq7}
+	\phi(\hat{Z^l}) = 
+	\begin{cases}
+		\hat{Z^l}, \text {if $\hat{Z^l}$ $>$ 0 }, \\
+		\vartheta _{i} * \hat{Z^l}, \text {if $\hat{Z^l}$ $\leq$ 0}, \\
+	\end{cases}
+\end{equation}
+where $\vartheta_{i}$, denotes the parameter which we obtain during the training phase. The PFFN layer extracts the non-linear information $\psi(\hat{Z^l})$ from each embedding of $\hat{Z^l}$ independently as 
+\begin{equation}  \label{eq2}
+	\psi(\hat{Z^l}) = \phi(\hat{Z^l}.W_1 + b_1).W_2 + b_2
+\end{equation}
+where $W_1, W_2, b_1, \text{and } b_2$, denote the weights and bias at two linear layers. In the fine-tuned transformers, we apply LN operation on the $\psi(\hat{Z^l})$ to produce the encoder out represented as $E_{o}$. 
+
+
+
+
+
+ preserves the values with negative gradients in $Z_l$ using  PReLU activation function ($\phi()$) 
+\begin{equation}  \label{eq7}
+	\phi(Z^l) = 
+	\begin{cases}
+		Z^l, \text {if $Z^l$ $>$ 0 }, \\
+		\vartheta _{i} * Z^l, \text {if $Z^l$ $\leq$ 0}, \\
+	\end{cases}
+\end{equation}
+where $\vartheta_{i}$, denotes the parameter which we obtain during the training phase. The output of the PFFN consists of the 
+as \cite{prelu} as extracts the non-linear information  $\psi(Z^l)$ from each embedding of $Z^l$ independently using  PReLU activation function ($\phi()$) as 
+\begin{equation}  \label{eq2}
+	\psi(Z^l) = \phi(Z^l.W_1 + b_1).W_2 + b_2
+\end{equation}
+where $W_1, W_2, b_1, \text{and } b_2$, denote the weights and bias at two linear layers. The $\phi(Z^l)$ function to preserve the values with negative gradients \cite{prelu} as
+\begin{equation}  \label{eq7}
+	\phi(Z^l) = 
+	\begin{cases}
+		Z^l, \text {if $Z^l$ $>$ 0 } \\
+		\vartheta _{i} * Z^l, \text {if $Z^l$ $\leq$ 0} \\
+	\end{cases}
+\end{equation}
+where $\vartheta_{i}$, denotes the parameter which we obtain during the training phase. In the fine-tuned transformers, we use layer normalization (LN) technique with residual connections to stabilize the outputs of MHA and PFFN layers \cite{LN, arxiv.org/pdf/2002.04745.pdf} \cite{LN}. Finally, the outcome of the encoder is $E_o$. 
+
+
+\begin{comment}
+
+
+The decoder in considered as autoregressor $D_{out}$, which is a kind of recurrent structure. At each time instance $t_i$, the $(t_{i-1})$ outcome will pass to the decoder along with the $p_{l_j}$.The outcome of the top encoder will transform them as an input to the decoder ($D_{in}$). The decoder block is very similar to the encoder network, except it will calculate the encoder-decoder attention ($ED_A$). The  $Z^l$ is the final outcome of the encoder, it contains the attention weights of the $Q_t^l$, $K_t^l$, and $R_t^l$. We will use the attention weights such as $K_t^l$, and $R_t^l$ and the equation is as follows,
+\begin{equation}  \label{eq8}
+D_{in} = K_t^l + R_t^l + D_{out}.
+\end{equation}
+
+The $D_{in}$ going to generate the sequence of word by word ,and we have to prevent the future tokens, to achieve this mechanism we use a technique known as  mask-MHA ($M_{MHA}$), which is very similar to MHA in the encoder.  The $M_{MHA}$ is  not going to use the information from the hidden locations. It can be done by  setting the  self-attention scores  with $0$'s and negative infinity (or a very large negative number). The reason behind the negative infinite is when we pass it to the softmax function then these are not going to be considered. we use these  $Q_t^l$ and $K_t^l$ for each of the layer in the decoder's $ED_A$ head. The $ED_A$ layer will help the decoder to focus on the particular location of the input sequence. The $Q_t^l$ vector is going to generate from the decoder, the $K_t^l$ and the  $R_t^l$ vectors are from the encoder side. By this we we capture the focus to the input sequence. The $ED_A$ is going to calculate the attention values between the vectors from the encoder network and the vectors from the decoder network.
+
+\begin{equation}
+\begin{aligned}
+\sigma_t^l = \text{softmax}\left( M_{MHA} + \frac{Q_t^l * (K_t^l)}{\sqrt{d_k}}\right)*R_t^l.
+\end{aligned}
+\end{equation}
+
+\begin{figure}[]
+\begin{center}		
+\subfloat[]{{\includegraphics[width=3cm,height=7cm]{DN10-crop.pdf} }}
+\qquad
+\qquad
+\qquad
+\subfloat[]{{\includegraphics[width=4.70cm,height=7cm]{decoder10-crop.pdf} }}
+\end{center}
+\vspace*{-\baselineskip}
+\caption{(a) Decoder network, (b) Decoder MHA. } 
+\end{figure}
+
+We pass the $Q_t^l$, the $K_t^l$, and the $R_t^l$ to the MHA layer in the decoder, which is similar to the MHA in the encoder network. Note that, the PFFN layer is present in the encoder networks and the decoder networks.  Then the output of second $MHA$ is goes as the input to $PFFN$ for further processing of the data. Finally, we pass the generated outcomes to the linear layer (dense layer). The resultant flatten vector will pass to the summarization layer $SL$ which consists of softmax activation function. It will generate the maximum probability outcomes. This process is autoregressive,untill we reach to the end of the sentence (end-token) we pass the output of the SL layer which acts as the classifier. The outcome of the decoder is final summary for the MI data. 
+
+\end{comment}
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+\begin{figure}[]
+	\begin{center}		
+		\subfloat[]{{\includegraphics[width=3cm,height=7cm]{DN10-crop.pdf} }}
+		\qquad
+		\qquad
+		\qquad
+		\subfloat[]{{\includegraphics[width=4.70cm,height=7cm]{decoder10-crop.pdf} }}
+	\end{center}
+	\vspace*{-\baselineskip}
+	\caption{(a) Decoder network, (b) Decoder MHA. } 
+\end{figure}
+The decoder network is  similar to the encoder network. The decoder  calculate the  Mask-Multi-Head Attention $(MMHA)$, the encoder-decoder attention ($A^i$), the $PFFN$, and the pointer generator network $(G(w_j))$. The input to the decoder ($D_{i}^t$) is previous time instance $t$ generated outcome $(D_{o}^{t-1})$  with the $p_{l_j}^{t-1}$ and $s_{l_j}^{t-1}$. The decoder is going to  generate the sequence of word-by-word, we have to prevent the future tokens.
+	\begin{equation}  \label{eq8}
+	D_{i}^t = D_{o}^{t-1} + p_{l_j}^{t-1} + s_{l_j}^{t-1}
+	\end{equation}
+
+The $D_{i}^t$ is the input vector to the $MMHA$ module, the $D_{i}^t$ is going to create  $Q_{d}^l$, $K_{d}^l$, and $R_{d}^l$ for each $D_{i}^t$. The $Q_{d}^l$, $K_{d}^l$, and $R_{d}^l$ are calculated by,
+
+\begin{equation}  \label{eq8}
+	\begin{aligned}
+	Q_{d}^l= D_{o}^{t-1} * W_{d}^Q, \\
+	K_{d}^l= D_{o}^{t-1} * W_{d}^K, \\
+	R_{d}^l= D_{o}^{t-1} * W_{d}^R,\\
+\end{aligned}
+\end{equation}
+ 
+Where $W_{d}^Q$, $W_{d}^K$, and $W_{d}^R$ are trainable parameters. We have to mask the the decoder's first $MHA$, because we do not want to share any kind of information with respect to the next word $w_j$. The rest of the process of $MMHA$ is same as the encoder's MHA and the equation as follows,
+
+
+ %%The $MMHA$ is not going to use the information from the hidden locations. It can be done by setting the self-attention scores with 0’s and negative infinity (or a very large negative number). The reason behind the negative infinite is when we pass it to the softmax function then these are not going to be considered. 
+
+\begin{equation}
+	\begin{aligned}
+		D_h^1 = \text{softmax}\left( MMHA + \frac{Q_d^l * (K_d^l)}{\sqrt{d_k}}\right)*R_d^l.
+	\end{aligned}
+\end{equation}
+
+where $D_h^i$ is treated as decoder's hidden state. We do the same operation with multiple weights of $W_{d}^Q$, $W_{d}^K$, and $W_{d}^R$ in order to find the attention,
+
+\begin{equation}
+	D_h^l = [D_h^1 \oplus D_h^2 \ldots \oplus D_h^u] * W_d,
+\end{equation}
+where $W_d$ is a trainable parameter. Here we need to calculate the $A^i$, which is main dependent on the $E_o$ and the $D_h^t$,
+
+%%Here after we obtain $D_h^l$ form $MMHA$ which is treated as query vector $Q_d^l$ for the $A^i$. The $K_d^l$ and $R_d^l$ are taken from the encoder block in order to find the attention between the encoder and the decoder network. It can be calculated as,
+
+\begin{equation}
+	A^i = \text{softmax}\left(v^T * tanh(W_o*E_o + W_h*D_h^1 + b_{attn})\right),
+\end{equation}
+
+where $v, W_o, W_h, b_{attn}$ are trainable parameters. We transform our $A_i$ to the $LN$, which is very similar to the operation in the encoder. Here comes the $PFFN$
+which is similar to the encoder and the equation is as follows,
+\begin{equation}  \label{eq2}
+	\psi(D_o) = \phi(A^i.W_3 + b_3).W_4 + b_4
+\end{equation} 
+where $W_3, W_4, b_3,b_4$ are trainable parameters. Next the attention distribution is calculated with respect to the weighted sum of the encoder hidden state $E_o$, which is considered as context vector $E_o^+$. %%In the next phase it pass through the $PFFN$ which is very similar to the encoder network.
+
+\begin{equation}
+	E_o^+ = \sum_t E_{o_{t}}*A^i_t,
+\end{equation}
+
+The objective of $E_o^+$ is what has been read from the input, which is a fixed size representation. The vocabulary distribution $P_{U}$ is calculated as follows,
+
+\begin{equation}
+	P_{U} = \text{softmax}\left(W_6 (W_5[D_h^l,E_o^+]+b_5)+b_6\right) ,
+\end{equation}
+
+where $W_5,W_6,b_5,b_6$ are trainable parameters. We use pointer generator network that is going to use both the $A^i$ and the $P_{U}$, in addition to this we also calculate the word generation probability $(G(w_j))$ for each time step $t$ is calculated from the  $E_o^+$, the $D_h^t$, and the input to the decoder $D_i^t$,
+	
+
+\begin{equation}
+	G(w_j) = \text{sigmoid}\left(w_o^T E_o^+ + w_h^T D_h^t + w_i^T D_i^t + b_{gen}\right) ,
+\end{equation}
+
+where $w_o^T, w_h^T, w_i^T, b_{gen}$ are the trainable parameters.  $G(w_j)$ is used as a switch to choose a word from the vocabulary by using the sampling from $P_{U}$, or by copying a word from the input by sampling the $A^i$. For the entire input sequence the extended vocabulary and the $w_j$ that present in the input thereby we obtain the final probability distribution for the out-of-vocabulary ($OOV$) word is as follows,
+
+\begin{equation}
+	P(w_j) = G(w_j) \odot P_{U} + (1-G(w_j)) \sum_t A^i_t, 
+\end{equation}
+If $w_j$ is an $OOV$ word then the $P_{U}$ of the word will be zero, whereas if the word is not present in the $MI$ then $\sum_t A^i_t$ will be zero. One more problem with these network is repetition, to solve this we introduced a $report-model$. The $report-model$ will maintain the report vector $(C_v)$, it can be considered as the sum of the $A^i$ over the decoder,
+
+\begin{equation}
+	C_v = \sum_{t} A^i_t, 
+\end{equation}
+The degree of redundancy can be measured as the words have received from the attention mechanism. 
+
+\begin{equation}
+	A^i_t = v^T * tanh(W_o*E_o + W_h*D_h^t+ W_c*C_{v_{t}} + b_{attn}),
+\end{equation}
+Finally, we pass the generated outcomes $(D^o_t)$ to the linear layer (dense layer).The resultant flatten vector will pass to the $SL$ layer which consists of softmax activation function. This process is autoregressive,untill we reach to the end of the sentence (end-token) we pass the output of the SL layer which acts as the classifier. The outcome of the decoder is final target summary $T_s$ for the MI data. 
+
+Here comes, the environment module, the main objective of this module is to evaluate the agent's actions. It consists of two components such as text context similarity ($TCS$) and the image selector ($IS$). The final generated summary is been evaluated with the MI to the model. Final outcome of this module is the summary and the image from the MI. So, the $TCS$  will evaluate the summarization quality by using ROUGE as an evaluation metric. The ROUGE internally use the recall ($Y_r$), the precision ($Y_p$),  and the f1-score ($Y_{{f}_1}$). The ROUGE measures the overlapping with the $MI$ and the $D^o_t$. The $Y_r$ refers to the method by which the system summary recovers or captures the bulk of the reference summary. The $Y_r$ reflects the number of words in the reference summary that overlap ($OV_s$) with the total number of words in the reference summary ($rf_s$) as follows:
+\begin{equation}
+	Y_r = OV_s / rf_s ,
+\end{equation}
+
+The $Y_r$, indicates the accuracy of the model with respect to the $rf_s$. Whereas $Y_p$ represents the accuracy of the model with respect to the target summary. The $Y_p$ represents the  words that is been overlapped $OV_s$ with the target summary ($T_s$),
+
+\begin{equation}
+	Y_p = OV_s / T_s ,
+\end{equation}
+
+Whereas $Y_{{f}_1}$ measures the weighted sum of the $Y_r$ and the $Y_p$,
+\begin{equation}
+	Y_{{f}_1} = 2 * ((Y_r*Y_p)/(Y_r+Y_p)) ,
+\end{equation}
+
+We use these metrics for evaluating the agent action in an environment, the ROUGE score ranging from $(0-1)$. We use a threshold $\tau$ to the $TCS$ module, if the value of  ROUGE score is greater than the $\tau$ then we accept the $T_s$, whereas if the score is less than $\tau$ we resend the same $MI$ to the agent module. Here  the reward in the $TCS$ is treated as ROUGE score. Whereas the other module is image selector, we use the outcome of the $IFE$ module i.e., $C$. There by we have to select the meaningful image from the $MI$. The $C$ and the target summary generated by the agent module is been compared with the each of the image. We compare each $C_{{v}_n}$ with the $T_s$ by using ROUGE score. We select an image from the $I$ based on the ROUGE score. While in the comparison, whichever image achieve better ROUGE score we consider it as the target image.Finally, we get the the outcomes of both the text and the image from the $MI$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{comment}
+
+\begin{equation}  \label{eq3}
+	\phi(Z^l) = 
+	\begin{cases}
+		y_{i}, \text {if $y_{i}$ $>$ 0 } \\
+		\alpha_{i} * y_{i}, \text {if $y_{i}$ $\leq$ 0} \\
+		
+	\end{cases}
+\end{equation}
+
+\begin{equation}  \label{eq2}
+	PFFN = R_{X} + \sum {(Linear + PRelu + Linear)}  + R_{X}
+\end{equation}
+
+to provide the attention to the weights 
+The encoder layer uses the layer-normalization (LN) layer to normalize the $Z^l$ as the skip-connection layer
+
+The LN layer helps to normalize the weights of PFFN for faster convergence towards the global minima. 
+
+
+Whereas, the PFFN layer is 
+
+
+We derive $V_Q = \{Q_1, Q_2, \ldots, Q_m\}$ as the query vector $\forall$ $Q_l \in X$. Similarly, we derive $V_K = \{K_1, K_2, \ldots, K_m\}$ as the key vector $\forall$ $K_l \in X$ and $V_R = \{R_1, R_2, \ldots, R_m\}$ as the value vector $\forall$ $R_l \in X$. Finally, we use the softmax function to obtain the self-attention $\sigma_{l_j}$ for $t_{l_j}$ as
+\begin{equation}
+	\lambda_{l_j} = {k: }
+\end{equation}
+
+
+, $k_{l_j}$, and $r_{l_j}$, the self-attention provides the score $\lambda_{l_j} = q_{l_j} * k_{l_j} $ to $t_{l_j}$. Finally, we use a softmax() to obtain the self-attention $\sigma_{l_j}$ for $t_{l_j}$ as
+\begin{equation}
+	\begin{aligned}
+		\sigma_{l_j} = \text{softmax}\left(\frac{\lambda_{l_j}}{\sqrt{d_k}}\right)*r_{l_j}
+	\end{aligned}
+\end{equation}
+
+helps the encoder to provide self-attention to the words in $X$.  In the MHA function, we create the query vector ($Q_{l_j}$), the key vector ($K_{l_j}$), and the value vector ($V_{l_j}$), for each $t_{l_j}$ in $X$ 
+
+,  each word uses $W^{Q}$ , $W^{K}$, and $W^{V}$
+
+
+ he query vector $Q_{x}$, the key vector $K_{X}$, and the value vector $V_{X}$ 
+
+The input X, will pass to the MHA to attain the importance of the context with the input $X$. The attention of words are calculated by the query vector $Q_{x}$, the key vector $K_{X}$, and the value vector $V_{X}$. In input X, it consists of certain number of words and each word in the input $X$ corresponds to $V_{T}$ of size 512. We multiply $Q_{X}$, $K_{X}$ and $V_{X}$   with the matrices such as $W^{Q}$ , $W^{k}$, and $W^{V}$ these weights are trained during the training phase. The dimensions of $Q_{x}$, $K_{X}$, and  $V_{X}$ after the multiplication is attained 64 dimensions. The main objective of this multiplication is to focus on the other words (one-to-many relationship). By this we can focus ($F_{X}$) on the important context of the input. 
+
+The MHA function helps the encoder to provide attention to words in $X$ based on their 
+
+is a self-attention module which encodes $w_j$ in $X$ based on the semantic relationship of $w_j$ 
+
+ 
+  Later, we pass the words with more attention to the summarization layer to generate the text of the MO summary. 
+ 
+ The $X$ will pass as an input to the fine-tune transformer which is a combination of stack of encoders-decoders. In each encoder, it consists of multi-head attention (MHA) and point-wise-feed-forward network (PFFN). The input X, will pass to the MHA to attain the importance of the context with the input $X$. The attention of words are calculated by the query vector $Q_{x}$, the key vector $K_{X}$, and the value vector $V_{X}$. In input X, it consists of certain number of words and each word in the input $X$ corresponds to $V_{T}$ of size 512. We multiply $Q_{X}$, $K_{X}$ and $V_{X}$   with the matrices such as $W^{Q}$ , $W^{k}$, and $W^{V}$ these weights are trained during the training phase. The dimensions of $Q_{x}$, $K_{X}$, and  $V_{X}$ after the multiplication is attained 64 dimensions. The main objective of this multiplication is to focus on the other words (one-to-many relationship). By this we can focus ($F_{X}$) on the important context of the input. 
+
+\begin{comment}
+Moreover preserving the sentence position and word position in the sentence also plays a vital role. In order to achieve this mechanism we used segment embeddings $V_S$, if the position (pos) of the sentence in the MI data is odd then we represent those sentences in the form of  $V_A$ otherwise  $V_B$,
+
+
+By obtaining the $I_T$, the IFE module extracts the matches the latent semantics presented in the $V_I$ to match with the text embeddings presented in the MI data. 
+
+\begin{equation}  \label{eq1}
+	V_{{S}_k} = 
+	\begin{cases}
+		V_{A},                 \text {if $Sent_{k}$ pos in MI data is odd}  \\
+		V_{B},                  \text {otherwise}  \\
+	\end{cases}
+\end{equation}
+To preserve the ordering of words in each $Sent_{k}$, we use positional encoding $V_{P}$  of same size $d_{m}$ as embeddings of $V_{T}$. The pos is calculated by using sine and cosine functions. Where pos is the position of each word and j is the dimension, the waveform from a geometric progression from  $2\pi-10000.2\pi$ (d). If the pos of the word in the $Sent_{k}$ is even, we use sine otherwise cosine function.
+
+
+----- SE section  -----
+
+Similarly to other sequence transduction models, we use learned embeddings to convert the input tokens and output tokens to vectors of dimension dmodel. 
+
+\begin{equation}  \label{eq2}
+	V_{P}(pos,V_{{t}_i}) = sin(pos / d ^ {(2j/d_m)})
+\end{equation}
+\begin{equation*}
+	V_{P}(pos,V_{{t}_i+1}) = cos(pos / d ^ {(2j/d_m)})
+\end{equation*}  
+
+\begin{equation}  \label{eq3}
+	V_{P} = 
+	\begin{cases}
+		V_{P}(pos,V_{{t}_i}), \text {if $V_{t}$ even positioning of word} \\
+		V_{P}(pos,V_{{t}_i+1}), \text {if $V_{t}$ odd positioning of word} \\
+		
+	\end{cases}
+\end{equation}
+
+
+In the TFE approach, we extract the textual context based on the word embedding approach, the position embedding approach, and the segment embedding approach. Let $S = \{s_1, s_2, \ldots, s_m\}$ represent the set of textual sentences presented in the MI data, where $s_j$ represent the $j^{th}$ sentence in $S$. In the TFE approach, we use the Word2Vec approach to extract the word embedding set $W_S = \{ W_{s_1}, W_{s_2}, \ldots, W_{s_m}\}$ where $s_j \in S$. Note that, $W_{s_j}$ is the set containing the word embedding of words presented in the sentence $s_j$. The TFE approach uses the position embedding to preserve the context of the word with respect to the position of the word
+
+
+Each word in the MI can be converted into the dimensions of 512 size vectors $V_T$. Moreover preserving the sentence position and word position in the sentence also plays a vital role.
+ 
+ will obtain the image embeddings  $I$. The next process in the $MI$ is to extract the feature vectors. In MI data, the text data can consists of k number of sentences $Sent_{k}$. Additionally, $TFE$ can be used to accomplish this mechanism. We use the Word2Vec  approach (W2V) for extracting the word embeddings from the textual content presented in the MI data. Each word in the MI can be converted into the dimensions of 512 size vectors $V_T$. Moreover preserving the sentence position and word position in the sentence also plays a vital role. In order to achieve this mechanism we used segment embeddings $V_S$, if the position (pos) of the sentence in the MI data is odd then we represent those sentences in the form of  $V_A$ otherwise  $V_B$,
+
+In the agent module, we focus on extracting the latent features from the images to a fine-tune transformer for generating the MO summary. In Section~\ref{sec:ImageSum}, we combine the ResNet50 with the LSTM approach for extracting the latent features from the images presented in the MI data. In the RLMS approach, we use the Word2Vec approach for extracting the word embeddings from the textual content presented in the MI data. In Section~\ref{sec:transformer}, we present the TL mechanism of the RLMS approach as part of the encoder-decoder based transformers. In the agent module, we fine-tune the transformer by replacing the activation function from the rectified linear activation unit (RELU) to the parametric rectified linear activation unit (PRELU) to reduce the information loss. The input to the transformers is the combination of the latent features of the images and the word embeddings presented in the MI data. Based on the input data, the transformer extracts the MO summary for the MI data.
+
+\subsubsection {Latent feature extraction from the Images}\label{sec:ImageSum}
+	The goal of our proposed technique RLMS is by using reinforcement learning to summarize multi-model data. We employ the ResNet50 to handle image data in order to achieve this methodology, and the tuned transformer for handling the text data. ResNet50 is a transfer learning technique that allows you to access pre-trained weights.  For image  \textit{${Y_{i}}$}, is represented with P,Q,R where as P = width of image, Q = height of image and R = channel of the image. The text data has n number of words, it is going to be considered as \textit{$X = \{x_{1},x_{2}, x_{3}, \dots, x_{n}\}$} as the input for the text data.
+	
+	\begin{equation}  \label{eq1}
+		Y_{i} = Image(P,Q,R)
+	\end{equation}
+	
+	To extract the key features from the image \textit{$Y_{i}$}, convolution operation, max-pooling and flatten layer are used in ResNet50 model. To extract the feature map, \textit{$Y_{i}$} is routed through a convolution operation. 
+	
+	\begin{center}
+		\graphicspath{ {./conv-crop.pdf/} }
+		\includegraphics[width=10cm]{conv-crop.pdf}
+		
+	\end{center}
+	\centerline{Figure-1: Convolution operation.}
+	
+	A convolution is represented in figure 1. To obtain the convoluted feature, we apply a filter/kernel (F) of size (s1,s2) to the input image $Y_{i}$ $>$ F(s1,s2). The next layer will receive this convoluted feature.	
+	\begin{equation}  \label{eq2}
+		Y_{k}^n = 
+		\begin{cases}
+			\sum_{k=1}^{n} Y_{i}^{(n-1)},   \text {input image feature}  \\
+			F_{s1s2}^n, \text {kernel/Filter}  \\
+		\end{cases}
+	\end{equation}
+	\\
+	\begin{equation*}
+		c_{onv} = Y_{i} * F 
+	\end{equation*}
+	%\begin{equation*}
+		%conv = max(0,Y_{i} * F) 
+		%\end{equation*}
+	
+	To extract the maximum value for the portions of the feature map, the subsequent matrix of the convolution operation is applied to max-pooling \textit{$M_{p}$}. By applying \textit{$M_{p}$} to the $C_{onv}$, the size (s3,s4) where s3, s4 are the outcomes of \textit{$M_{p}$}. The image size of conv should always $M_{p}$  $<$ $Y_{i}$. 
+	
+	\begin{equation}  \label{eq3}
+		M_{p} = max(c_{onv})_{s3s4}
+	\end{equation}
+	
+	Series of convolution operations with max-pooling is implemented to the image to extract best key features from $Y_{i}$ is feature-map (\textit{$F_{m}$}).  
+	
+	\begin{equation}  \label{eq4}
+		F_{m} =  \sum_{i=1}^{n} ( c_{onv} + M_{p}) ^ n
+	\end{equation}
+	
+	The outcome of the last $M {p}$ is represented as a single dimension vector known as flatten layer (\textit{$Flatten_{F_{m}}$}), after the series of $F_{m}$ is applied to the image is the final feature extractor (\textit{$F_{e}$}). 
+	
+	\begin{equation}  \label{eq5}
+		F_{e}= Faltten_{F_{m}}  
+	\end{equation}
+	
+	
+	
+	
+	\begin{center}
+		\graphicspath{ {.l1-crop.pdf/} }
+		\includegraphics[width=14cm]{l1-crop.pdf}
+		\centerline{Figure-2: Image summary network.}
+	\end{center}
+	ImageNet is a pre-trained database with millions of images of animals, humans, and pens [25]. The ResNet50 is a 50-layer convolution neural network [24]. ResNet50 is a pre-trained transfer learning model which is based on the ImageNet database. Convolution blocks, max-pooling, and flatten layers with skip connections constitute this set. Skip connections are often used to replicate features from preceding layer into subsequent layers explicitly[24].ResNet50's last layer contains 1000 neurons, whereas the previous layer contains 2048 vectors. The last layer of the network was omitted for improved accuracy. Finally, the flatten layer with 2048 neurons is the ResNet50's outcome. The outcome of the ResNet50 modal is flatten array, which is represented by $V_{f}$. The article usually consists of images. For better summarization we need to generate caption of an  image. The caption of the image processed to Long short-term memory (LSTM) [26], it  will generate $C_{i}$. Then the generated $C_{i}$ will pass through Word2Vec (W2V) to generate vectors of a caption generated by LSTM network represented as $V_{c}$. The $V_{f}$ consists of  2048 vectors of an image, whereas, $C_{i}$ is  concatenated with $V_{f}$. The vectors were merged and passed through a series of LSTM and dense layers. When the SoftMax activation function is applied to a dense layer, the result is a set of vectors. To construct a summary of the image and caption, these vectors will be processed using inverse transformation.The outcome of summarization of image is represented as \textit{$O_{img}$}. The flowchart for the image summarization is in Figure-2. 
+	
+	
+	\subsection {\textbf{Summarization of text in the document:}}\label{sec:4.1}	 
+	
+	Text document is concatenated with \textit{$O_{img}$} and represented as   \textit{$I_{t}$} consists of words represented as  \textit{$X = \{x_{1},x_{2}, x_{3}, \dots, x_{n}\}$}. Each word in the document is considered as tokens represented as \textit{$T = \{t_{1},t_{2}, t_{3}, \dots, t_{n}\}$}. Each token is converted into vectors as \textit{$V = \{V_{t1},V_{t2}, V_{t3}, \dots, V_{tn}\}$}. Positional encoding (PE) \textit{$P_{v}$} are added to the vectors to preserve the ordering of the text in the document for not to miss the context of the document, then the vectors after PE is as follows \textit{$P_{v} = \{P_{t1},P_{t2}, P_{t3}, \dots, P_{tn}\}$} . 
+	
+	\begin{equation} \label{eq6}
+		I_{t} = \sum_{i=1}^{n} V_i + \sum_{j=1}^{m} P_{t_i}
+		%	$$textit{${x_{n}} = \textit{$T = \{T_{n} \}$
+			\end{equation}
+			%\begin{document}
+				\begin{center}
+					\graphicspath{ {./1-crop.pdf/} }
+					\includegraphics[width=4cm]{I1-crop.pdf}
+					
+				\end{center}
+				\centerline{Figure 3: Input text to vectors.}
+				
+				
+				The positional encoding \textit{$PE_{s}$}  are calculated by using the sin and cos functions. For even locations, the sin function is utilized, and (2m) is used to determine the even position of the word. For odd placements, the cos method is applied, whereas (2m+1) is being used to determine the odd position. Here m stands for dimensions, to learn the relative position (pos) of the word, where as  $d_{m}$ where d is the depth of the model.  
+				
+				\begin{equation}  \label{eq7}
+					PEs(pos,2m) = sin(pos / d ^ {(2m/d_m)})
+				\end{equation}
+				\begin{equation*}
+					PEs(pos,2m+1) = cos(pos / d ^ {(2m/d_m)})
+				\end{equation*}
+				
+				Let k be the position, for even and odd ordering of the words the PEs(pos,k) as  
+				
+				\begin{equation}  \label{eq8}
+					PEs(pos,k) = 
+					\begin{cases}
+						PEs(pos,2m), \text {if k = even positioning of word} \\
+						PEs(pos,2m+1), \text {if k = odd positioning of word} \\
+						
+					\end{cases}
+				\end{equation}
+				\\
+				
+				
+								
+				
+				In RLMS consists of both encoder and decoder to generate the abstraction summary using RL approach. \textit{$I_{t}$} is the input for encoder. The main motto of encoder is to understand the context of the document by using multi-head attention (MHA) and point-wise feed farward network (PFFN) as shown 5.
+				
+				\begin{center}
+					\graphicspath{ {./2-crop.pdf/} }
+					\includegraphics[width=8cm]{I2-crop.pdf}
+					\centerline{Figure 5: Encoder Network.}
+				\end{center}
+				
+				
+				MHA is used to calculate the attention weights and pass to network. MHA is segregated to the  given input as query  (\textit{$Q_{x}$})  , key (\textit{$K_{x}$}) and  value (\textit{$V_{x}$}). Then $Q_{x}$ and $K_{x}$ were multiplied (matmul). After performing matmul operation the resultant is normalized by performing scale down operation (S). scaling is done by diving matmul output by the square root of $Q_{x}$ and $K_{x}$. softmax activation function (SM) is imposed on the resultant vectors. softmax is going to provide probability ration between 0 to 1. It gives highest probability  to get meaningful summary. matmul operation is performed on $V_{x}$ and resultant softmax activation function in figure 6. The main objective of MHA is to hold all the context of the document.   
+				
+				\begin{center}
+					\graphicspath{ {./3-crop.pdf/} }
+					\includegraphics[width=7cm]{3-crop.pdf}
+					\centerline{Figure 6: Encoder-Multi-Head-Attention.}
+				\end{center}
+				
+				\begin{equation}  \label{eq9}
+					Matmul  = Q_{x} * K_{x}^T
+				\end{equation}
+				
+				
+				\begin{equation}  \label{eq10}
+					S = Matmul/\sqrt{Dim_{Matmul}}
+				\end{equation}
+				
+				
+				\begin{equation}  \label{eq11}
+					SM_{i} = exp(QK_{i})/( \sum_{j}exp(QK_{j}))
+				\end{equation}
+				
+				
+				And because the self-attention weights (SAW) are calculated using an attention mechanism, they produce a more appropriate outcome that preserves the sentence's meaning.
+				\begin{equation}  \label{eq12}
+					SAW = SM_{i} * V_{x}
+					%	softmax(Scaled_{XY})_{i} = exp(XY_{i})/( \sum_{j}exp(XY_{j}))
+				\end{equation}
+				To speed up the model's computations, we split the input data into several query, key, and value pairs, with each pair computing the attention weights in parallel. Finally, all of these weights (FSAW) are stacked and passed to the next layer.
+				\begin{equation}  \label{eq13}
+					FSAW = \sum_{i=1}^{n} SAW
+					%	softmax(Scaled_{XY})_{i} = exp(XY_{i})/( \sum_{j}exp(XY_{j}))
+				\end{equation}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				-----------------------
+				
+				
+				The output of the MHA vectors is then added to the positional input embedding, which we refer to as the residual connection (RC), and the residual connection's output is then normalized.
+				\begin{equation}  \label{eq14}
+					RC = Norm(FSAW + PE_{s})
+					%	softmax(Scaled_{XY})_{i} = exp(XY_{i})/( \sum_{j}exp(XY_{j}))
+				\end{equation}
+				After RC operation the output of the RC is get projected to the Point-Wise-Feed-Forward-Network (PFFN). Here, in this operation the vectors pass through a couple of linear layers with PRELU as an activation, the main purpose of taking PRELU is no to deactivate the neurons, if we use RELU the output of RELU is  max(0,x), by using RELU we might loss some of the information so to avoid such a conditions we are suggesting PRELU to increase the efficiency of the model. And the purpose of the RC is to help the neural network train, by allowing the gradients that will flow through the neural network directly. The PFFN is mainly used to project the attention weights potentially providing a richer presentation. The purpose of adding RC to the start and the end of the PFFN is to normalize the attentions weights, which gives the better results. The outcome of the PRELU is max(0.1*x,x), so we are not going to kill any neuron in the process, which gives the model more attention.
+				\begin{equation}  \label{eq16}
+					PFFN = RC + \sum_{i=1}^{n} (Linear+PRELU+Linear)_{n} + RC
+					%	softmax(Scaled_{XY})_{i} = exp(XY_{i})/( \sum_{j}exp(XY_{j}))
+				\end{equation}
+				\begin{center}
+					\graphicspath{ {./4-crop.pdf/} }
+					\includegraphics[width=7cm]{4-crop.pdf}
+					\centerline{Figure 5: Point-Wise-Feed-Forward-Network.}
+				\end{center}
+				
+				
+				Now comes the decoder part it is similar to encoder but in decoder it consists of two multi head attentions (MHA), one point wise feed forward network,residual connection (RC) and layer normalization. In the decoder phase the input goes through the embedding layer and positional encoding are added to the input sequence to preserve the ordering of the context and these are feed into the first MHA layer which if going to compute the  attention weights for the decoder's input.
+				\begin{equation}  \label{eq17}
+					decoder_{input} = input_{text} + PE_{s}
+					%	softmax(Scaled_{XY})_{i} = exp(XY_{i})/( \sum_{j}exp(XY_{j}))
+				\end{equation}
+				
+				Decoder's first MHA is slightly differ, since the decoder is autoregressor .i.e, it to going to generate the sequence of word by word ,and we have to prevent the future tokens and to achieve this mechanism we use a technique known as Look-Ahead-Attention (LAA). This technique is same as the attention weights and the difference is the LAA matrix is filled with 0's and negative infinities, and reason behind the negative infinite is when we pass it to the softmax function then these are not going to be considered, in this way we prevent the occurrence of all the words at the same time. And moreover in simple terms LAA is treated as masking.
+				\begin{equation}  \label{eq18}
+					Decodre_{MHA1}  = Scaled_{scores} + LAA	
+				\end{equation}
+				\begin{center}
+					\graphicspath{ {./5-crop.pdf/} }
+					\includegraphics[width=6cm]{5-crop.pdf}
+					\centerline{Figure 6: Decoder's first MHA.}
+				\end{center}
+				
+				Rest of the part of the first MHA is same as the encoder's MHA. And in second MHA the encoder's output such as query and key, and the encoder's first MHA output are treated as values and it is going to match the connection between the encoder-decoder i.e, encoder is going to decide the relevant words to put more focus on. Then the output of second MHA is goes as the input to PFFN for further processing of the data, and decoder's PFFN is same as the encoder's PFFN. And finally, we pass the output of the PFFN to the final Linear layer which acts as the classifier, on the classifier softmax function is applied and finally we get the abstractive summary of the article.
+				
+				Then the output of the encoder-decoder model is the abstractive summary and we are going to compare the generated summary with the original input. Here, we are using our fine-tuned transformer encoder which gives us the vectors of both the generated summary and the input text. if the similarity is good then the model is doing good, if it is not the scenario then we are using Reinforcement Learning(RL) where the environment is the input data articles and the agent is the fine tuned transformer BERT. So, if the similarity between the original summary and generated is negative then it the input again goes to the model and adjust the weights until unless we get the better results it will keep on iterating on the data.
+				
+				\begin{center}
+					\graphicspath{ {./7-crop.pdf/} }
+					\includegraphics[width=6cm]{7-crop.pdf}
+					\centerline{Figure 7: Content Similarity Engine .}
+				\end{center}
+				
+				For the similarity check, we pass the input text and generated summary into the transformer  encoder, that gives the vector representation of the both the sentences on those vectors ITS is applied.
+				
+				\begin{equation}  \label{eq19}
+					ITS = Cos \theta	
+				\end{equation}
+				
+				We find the ITS distance $ITS_{d}$ to get weather the two sentences are closed to each other in the context or not.
+				
+				\begin{equation}  \label{eq20}
+					ITS_{d } = 1- ITS
+				\end{equation}
+				
+				If the context similarity  $C_{s}$  is matched in the input text and and generated then we get the good ITS score if not then it pass through the model and self attention weights are adjusted until it get better similarity score.
+				
+				\begin{equation}  \label{eq21}
+					C_{s} = 
+					\begin{cases}
+						positive, \text {if ContextInputText == GeneratedAbstractiveSummary} \\
+						negative, \text {if -ve input text pass through the model by adjusting attention weights.} \\
+					\end{cases}
+				\end{equation}
+				
+				
+				\section{Experimental Setup and Evaluation}\label{sec:Results}
+				
+				\subsection {\textbf{Datasets}}
+				
+				We analyze that our RLMS makes utilization of  multi-model data. Different datasets are illustrated, including the CNN/DailyMail dataset, InShorts dataset, IndiaToday data scraped by the authors from the IndiaToday website. 
+				
+				
+				
+				\begin{description}
+					\item \textbf{CNN/DailyMail dataset[22]:} \textit{}CNN and DailyMail are a mix of news items and stories highlights, among each article spanning 115 words . Articles were gathered from 2007 to 2020. Here it considers textual data only.
+					
+					\item \textbf{Inshorts dataset[]:} \textit{} consists of both the textual and the image data. It is a database that consists of the shorter summaries of the news articles around the globe. The dataset included with the headline and the shorter summary of an article.
+					
+					\item \textbf{IndiaToday dataset[23]:} \textit{} We created our personalized dataset using the IndiaToday website, which contains diverse types of articles such as business, sport, technology, and science. We require both the text and image datasets in the article for our RLMS. 
+				\end{description}
+				
+		\subsection {\textbf{ Data preprocessing and evaluation metrics }}
+				
+				In this section we present our setup for evaluating the proposed RLMS approach. We will discuss the setup, the evaluating metrics and the results comparing with the other models. To obtain better results, we prepossessed the data(D1) by removing stopwords $R_{s}$, punctuation's $R_{p}$ and numericals $R_{n}$ from the input. The prepossessed data will be appended as D2 = '$<$go$>$ ' + D1 + '$<$stop$>$'.The obtained D1 will be converted into tokens {$T = \{t_{1},t_{2}, t_{3}, \dots, t_{n}\}$},and  these tokens will be transformed into Vectors as {$V = \{v_{1},v_{2}, v_{3}, \dots, v_{n}\}$} and PEs will be added to the vectors to preserve the ordering sequence to the input text. Vectors will be send as an input to the proposed fine-tuned transformer architecture to both encoder and decoder for further process. 
+				
+				\begin{equation}  \label{eq22}
+					D1 = R_{s+p+n}        
+				\end{equation}
+				\begin{equation*}  
+					D2 =  \textless go \textgreater + D1 +  \textless exit \textgreater
+				\end{equation*}
+				\begin{equation*}  	
+					D3 = D2 \implies T  \implies V \implies  V+PEs
+				\end{equation*}
+				
+				Then from the image, we have to extract the feature vectors these vectors are appended with the P3 and passed as an input to the model. So, to extract the feature vectors we used convolution operation, max pooling and flatten layers as seen in the eq(3,4,5). Once the abstractive summary is generated  by the model we then check the similarity of input to the generated summary. To achieve this we have used the ITS engine as discussed in eq(20). 
+				If the  $ITS$ score is positive then the the summary generated by RLMS approach is given as an output, if it is negative then the self attention weights of the transformer model are updated to reduce the loss. 
+				
+				The  results are evaluated by using the ROUGE score, it is a metric that is used to measure the generated summary and the original text. Ans the the ROUGE score range is between [0,1], if the score is 1 then there is more similarity and the score 0 refers to the poor similarity content.
+				
+				\begin{equation}  \label{eq23}
+					ROUGE_{score} = 
+					\begin{cases}
+						1, \text {if ContextInputText == GeneratedAbstractiveSummary} \\
+						0, \text {if ContextInputText != GeneratedAbstractiveSummary} \\
+					\end{cases}
+				\end{equation}
+				
+				And a series of experiments is done, the Precision(P),Recall(R),F1-score(F) are calculated for ROUGE-1,ROUGE-2 and for ROUGE-3. And the results are shown in the below figures.
+				
+	\subsection {\textbf{Results}}
+				\begin{center}
+					\begin{table}				
+						\caption{ROUGE Score Evaluation comparison between (a) the S2S approach, (b) the Pretrained Encoders approach, (c) the MS with BERT approach, and (d) the RLMS approach.} 
+						\subfloat[S2S]{{\includegraphics[width=7.95cm]{t1a-crop.pdf} }}
+						\qquad
+						\subfloat[Pretrained Encoders]{{\includegraphics[width=7.95cm]{t1b-crop.pdf} }}
+						\qquad
+						\subfloat[MS with BERT]{{\includegraphics[width=7.95cm]{t1c-crop.pdf} }}
+						\qquad
+						\subfloat[RLMS]{{\includegraphics[width=7.95cm]{t1d-crop.pdf} }}
+						\label{Comparison_Table}
+					\end{table}
+				\end{center}
+				
+			
+				In this paper, we evaluate the RLMS approach with the existing approaches: \textbf{the S2S approach \cite{}, the pre-trained encoders \cite{}, and the MS with BERT approach \cite{}}. The S2S approach is an encoder-decoder based LSTM architecture which generates extractive summary from the input document. The encoder of the S2S approach extracts the contextual information presented in the input at each timestamp. Whereas, the decoder of the S2S approach predicts the  summary based on the contextual information obtained from the encoder. In the pre-trained encoders, the authors introduced a document level encoder based on BERT for extracting the semantics presented in the input document. They fine-tuned the BERT for generating the text-based summary from the input document. In the MS with BERT approach, the authors used a self-attention mechanism with the BERT for extracting the latent features presented in the MI data containing the images and textual content. They focused on generation of the text-based summary from latent features presented in the MI data. In the existing approaches, the authors used the ROUGE-1, the ROUGE-2, and the ROUGE-3 scores to evaluate the correctness of the generated summary. In Table~\ref{Comparison_Table}, we compare the ROUGE scores of the RLMS approach based on the precision, the recall, and the F1-score evaluation metrics with the existing approaches. 
+				
+				The results of the ROUGE are shown in the below tables such as Table 1(a) is with respect to the S2S approach. Whereas, the Table 1(b) is related to the pre-trained encoders model. Similarly to these Table 1(c) and Table 1(d) are related to the ROUGE metrics of MS with BERT and RLMS approach. In each table the ROUGE-1,2,3 are calculated with respect to the precision,the recall, and the F1-score. In our proposed approach, we consider upto ROUGE-3 as an evaluation metric. Whereas, in the S2S,the pre-trained encoders, and  in the MS with BERT the authors taken into consideration of ROUGE-3. In Table 1(d) the RLMS approach is evaluated with the datasets such as the DailyMail, the Inshorts, and the IndiaToday data. Whereas, the ROUGE for the DailyMail dataset out preformed will with respect to the other approaches. The reason is that, the RLMS approach is fine-tuned with the PRELU activation function in the model architecture. The reason for the S2S approach with a very less in ROUGE score is, the S2S is unidirectional in nature. To address this issue, we consider  bidirectional encoder which is bi-direction in nature. Then the issue with pre-trained encoders model is, it does not taken into consideration of MI. In this approach, the TL mechanism is not taken into consideration. So, to address these issue we include TL approach to access the pre-trained weights. In the Table 1(d) the ROUGE of all the metrics such as the precision, the recall, and the F1-score are performed good. with respect to the other approaches mentioned in the Tables 1(a,b,c). The latency of our RLMS approach is very less compared with the other approaches. The reason is because, we fine-tuned the transformer model with PRELU activation function. By this mechanism
+				the convergence towards global minima is very fast. In the Table (2), the average ROUGE metrics of each approach is mentioned with respect to the precision, the recall, and the F1-score. The RLMS approach with the ROUGE-3 have the maximum ROUGE score of 0.91. Figure 8 illustrates the graphical representation of the precision, the recall, and the F1-score of the S2S approach, the pre-trained encoders, the MS with BERT, and the RLMS approach. 
+				
+					\begin{center}
+					\begin{table}[ht]
+						\caption{Average ROUGE Score Evaluation comparison between the S2S approach, the Pretrained Encoders approach, the MS with BERT approach, and the RLMS approach.} 
+						\includegraphics[width=15cm]{t1e-crop.pdf} 
+						\label{Average_Comparison_Table}
+					\end{table}
+				\end{center}
+				\vspace*{-\baselineskip}
+				
+
+			
+	
+				\begin{figure}[t]
+					\begin{center}
+						
+						\begin{minipage}[t]{0.44 \textwidth}
+							\includegraphics[width=8.10cm]{f1-score-crop.pdf} 
+						\end{minipage}
+						
+						\begin{minipage}[t]{0.47\textwidth}
+							\includegraphics[width=8.10cm]{Precision-crop.pdf}
+						\end{minipage}
+						\begin{minipage}[t]{0.47\textwidth}
+							\includegraphics[width=8.10cm]{Recall-crop.pdf}
+						\end{minipage}
+						
+					\end{center}
+					\centerline{Figure 8: ROUGE Metrics.}
+				\end{figure}
+				
+				\clearpage
+				
+				\section{Conclusion}\label{sec:conclusion}
+				To be written
+				
+				\section{References}\label{sec:references}
+				
+				\begin{comment}
+				[1]	 Mani, Inderjeet, and Mark T. Maybury. "Automatic summarization." (2001):  286.
+				
+				[2] Li, Haoran, Junnan Zhu, Cong Ma, Jiajun Zhang, and Chengqing Zong. "Read, watch, listen, and summarize: Multi-modal summarization for asynchronous text, image, audio and video." IEEE Transactions on Knowledge and Data Engineering 31, no. 5 (2018): 996-1009.
+				
+				[3] Verma, Rakesh, and Daniel Lee. "Extractive summarization: Limits, compression, generalized model and heuristics." Computación y Sistemas 21, no. 4 (2017): 787-798.
+				
+				[4] Menéndez, Héctor D., Laura Plaza, and David Camacho. "Combining graph connectivity and genetic clustering to improve biomedical summarization." In 2014 IEEE Congress on Evolutionary Computation (CEC), pp. 2740-2747. IEEE, 2014.
+				
+				[5] Maynez, Joshua, Shashi Narayan, Bernd Bohnet, and Ryan McDonald. "On faithfulness and factuality in abstractive summarization." arXiv preprint arXiv:2005.00661 (2020).
+				
+				[6] Devlin, Jacob, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. "Bert: Pre-training of deep bidirectional transformers for language understanding." arXiv preprint arXiv:1810.04805 (2018).
+				
+				[7] Albawi, Saad, Tareq Abed Mohammed, and Saad Al-Zawi. "Understanding of a convolutional neural network." In 2017 International Conference on Engineering and Technology (ICET), pp. 1-6. Ieee, 2017.
+				
+				[8] Schmidt-Hieber, Johannes. "Nonparametric regression using deep neural networks with ReLU activation function." The Annals of Statistics 48, no. 4 (2020): 1875-1897.
+				
+				[9] Lau, Mian Mian, and King Hann Lim. "Review of adaptive activation function in deep neural network." In 2018 IEEE-EMBS Conference on Biomedical Engineering and Sciences (IECBES), pp. 686-690. IEEE, 2018.
+				
+				[10] Sutton, Richard S., and Andrew G. Barto. Reinforcement learning: An introduction. MIT press, 2018.
+				
+				[11] Nenkova, Ani, and Kathleen McKeown. "A survey of text summarization techniques." In Mining text data, pp. 43-76. Springer, Boston, MA, 2012.
+				
+				[12] Zhang, Yin, Rong Jin, and Zhi-Hua Zhou. "Understanding bag-of-words model: a statistical framework." International Journal of Machine Learning and Cybernetics 1, no. 1-4 (2010): 43-52.
+				
+				[13] Joachims, Thorsten. A Probabilistic Analysis of the Rocchio Algorithm with TFIDF for Text Categorization. Carnegie-mellon univ pittsburgh pa dept of computer science, 1996.
+				
+				[14] Lin, Chin-Yew. "Rouge: A package for automatic evaluation of summaries." In Text summarization branches out, pp. 74-81. 2004.
+				
+				[15] Kumar, Akshi, Aditi Sharma, Sidhant Sharma, and Shashwat Kashyap. "Performance analysis of keyword extraction algorithms assessing extractive text summarization." In 2017 International Conference on Computer, Communications and Electronics (Comptelix), pp. 408-414. IEEE, 2017.
+				
+				[16] Mihalcea, Rada, and Paul Tarau. "Textrank: Bringing order into text." In Proceedings of the 2004 conference on empirical methods in natural language processing, pp. 404-411. 2004.
+				
+				[17] Dave, Harsha, and Shree Jaswal. "Multiple text document summarization system using hybrid summarization technique." In 2015 1st International Conference on Next Generation Computing Technologies (NGCT), pp. 804-808. IEEE, 2015.
+				
+				[18] Jiang, Jiawen, Haiyang Zhang, Chenxu Dai, Qingjuan Zhao, Hao Feng, Zhanlin Ji, and Ivan Ganchev. "Enhancements of Attention-Based Bidirectional LSTM for Hybrid Automatic Text Summarization." IEEE Access 9 (2021): 123660-123671.
+				
+				[19] Shi, Tian, Yaser Keneshloo, Naren Ramakrishnan, and Chandan K. Reddy. "Neural abstractive text summarization with sequence-to-sequence models." ACM Transactions on Data Science 2, no. 1 (2021): 1-37.
+				
+				[20] Liu, Yang, and Mirella Lapata. "Text summarization with pretrained encoders." arXiv preprint arXiv:1908.08345 (2019).
+				
+				[21] Savelieva, Alexandra, Bryan Au-Yeung, and Vasanth Ramani. "Abstractive Summarization of Spoken and Written Instructions with BERT." arXiv preprint arXiv:2008.09676 (2020).
+				
+				[22] Karl Moritz Hermann, Tomas Kocisky, Edward Grefenstette, Lasse Espeholt, Will Kay, Mustafa Suleyman, and Phil Blunsom. 2015. Teaching Machines to Read and Comprehend. In Advances in Neural Information Processing Systems 28, C. Cortes, N. D. Lawrence, D. D. Lee, M. Sugiyama, and R. Garnett (Eds.). Curran Associates, Inc., 1693–1701. http://papers.nips.cc/paper/5945-teaching-machines-to-readand-comprehend.pdf
+				
+				[23]https://github.com/funnyPhani/Research-day-code-SRM/blob/main/IndiaToday%20Data%20Collection.ipynb
+				
+				[24] Rezende, Edmar, Guilherme Ruppert, Tiago Carvalho, Fabio Ramos, and Paulo De Geus. "Malicious software classification using transfer learning of resnet-50 deep neural network." In 2017 16th IEEE International Conference on Machine Learning and Applications (ICMLA), pp. 1011-1014. IEEE, 2017. 
+				
+				[25] Deng, Jia, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. "Imagenet: A large-scale hierarchical image database." In 2009 IEEE conference on computer vision and pattern recognition, pp. 248-255. Ieee, 2009.
+				
+				[26] Sundermeyer, Martin, Ralf Schlüter, and Hermann Ney. "LSTM neural networks for language modeling." In Thirteenth annual conference of the international speech communication association. 2012.
+				
+				\end{comment}
+\begin{comment}
+				
+				Phani Kumar
+				
+				[20] Zhong, Ming, Pengfei Liu, Danqing Wang, Xipeng Qiu, and Xuanjing Huang. "Searching for effective neural extractive summarization: What works and what's next." arXiv preprint arXiv:1907.03491 (2019).
+				
+				[21] Rani, Ruby, and Daya K. Lobiyal. "A weighted word embedding based approach for extractive text summarization." Expert Systems with Applications 186 (2021): 115867.
+				
+				[22] Belwal, Ramesh Chandra, Sawan Rai, and Atul Gupta. "A new graph-based extractive text summarization using keywords or topic modeling." Journal of Ambient Intelligence and Humanized Computing 12, no. 10 (2021): 8975-8990.
+				
+				[23] Mojrian, Mohammad, and Seyed Abolghasem Mirroshandel. "A novel extractive multi-document text summarization system using quantum-inspired genetic algorithm: MTSQIGA." Expert systems with applications 171 (2021): 114555.
+				
+				[24] Masum, Abu Kaisar Mohammad, Sheikh Abujar, Md Ashraful Islam Talukder, AKM Shahariar Azad Rabby, and Syed Akhter Hossain. "Abstractive method of text summarization with sequence to sequence RNNs." In 2019 10th international conference on computing, communication and networking technologies (ICCCNT), pp. 1-5. IEEE, 2019.
+				
+				[25] Shi, Tian, Yaser Keneshloo, Naren Ramakrishnan, and Chandan K. Reddy. "Neural abstractive text summarization with sequence-to-sequence models." ACM Transactions on Data Science 2, no. 1 (2021): 1-37.
+				
+				[26] Debnath, Dipanwita, Ranjita Das, and Shaik Rafi. "Sentiment-Based Abstractive Text Summarization Using Attention Oriented LSTM Model." In Intelligent Data Engineering and Analytics, pp. 199-208. Springer, Singapore, 2022.
+				
+				[26] Erol, Berna, D-S. Lee, and Jonathan Hull. "Multimodal summarization of meeting recordings." In 2003 International Conference on Multimedia and Expo. ICME'03. Proceedings (Cat. No. 03TH8698), vol. 3, pp. III-25. IEEE, 2003.
+				
+				[27] Tschiatschek, Sebastian, Rishabh K. Iyer, Haochen Wei, and Jeff A. Bilmes. "Learning mixtures of submodular functions for image collection summarization." Advances in neural information processing systems 27 (2014).
+				
+				[28] Sharma, Deepak Kumar, Anurag Singh, Sudhir Kumar Sharma, Gautam Srivastava, and Jerry Chun-Wei Lin. "Task-specific image summaries using semantic information and self-supervision." Soft Computing (2022): 1-14.
+				
+				[29] Li, Haoran, Junnan Zhu, Cong Ma, Jiajun Zhang, and Chengqing Zong. "Read, watch, listen, and summarize: Multi-modal summarization for asynchronous text, image, audio and video." IEEE Transactions on Knowledge and Data Engineering 31, no. 5 (2018): 996-1009.
+				
+				[30] Zhu, Junnan, Lu Xiang, Yu Zhou, Jiajun Zhang, and Chengqing Zong. "Graph-based Multimodal Ranking Models for Multimodal Summarization." Transactions on Asian and Low-Resource Language Information Processing 20, no. 4 (2021): 1-21.
+				
+				[31] Chen, Jingqiang, and Hai Zhuge. "Abstractive text-image summarization using multi-modal attentional hierarchical rnn." In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing, pp. 4046-4056. 2018.
+				
+				[32] Fu, Xiyan, Jun Wang, and Zhenglu Yang. "Multi-modal Summarization for Video-containing Documents." arXiv preprint arXiv:2009.08018 (2020).
+				
+				[33] Fu, Xiyan, Jun Wang, and Zhenglu Yang. "MM-AVS: A Full-Scale Dataset for Multi-modal Summarization." In Proceedings of the 2021 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, pp. 5922-5926. 2021.
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				\end{comment}
+\begin{comment}
+				Commented code
+				
+				
+				[1]   Mani, Inderjeet, and Mark T. Maybury. "Automatic summarization." (2001): 286.
+				
+				[2]   Bhatia, Neelima, and Arunima Jaiswal. "Trends in extractive and abstractive techniques in text summarization." International Journal of Computer Applications 117, no. 6 (2015).
+				
+				[3]   Murray, Gabriel, Steve Renals, and Jean Carletta. "Extractive summarization of meeting recordings." (2005).
+				
+				[4]   Kan, Min-Yen, Judith L. Klavans, and Kathleen R. McKeown. "Using the annotated bibliography as a resource for indicative summarization." arXiv preprint cs/0206007 (2002).
+				
+				[5]   Medsker, Larry R., and L. C. Jain. "Recurrent neural networks." Design and Applications 5 (2001): 64-67.
+				
+				[6]  Graves, Alex. "Long short-term memory." In Supervised sequence labelling with recurrent neural networks, pp. 37-45. Springer, Berlin, Heidelberg, 2012.
+				
+				[7]  Liu, Xinhai, Zhizhong Han, Yu-Shen Liu, and Matthias Zwicker. "Point2sequence: Learning the shape representation of 3d point clouds with an attention-based sequence to sequence network." In Proceedings of the AAAI Conference on Artificial Intelligence, vol. 33, no. 01, pp. 8778-8785. 2019.
+				
+				[8]  Liu, Yang, and Mirella Lapata. "Text summarization with pretrained encoders." arXiv preprint arXiv:1908.08345 (2019).
+				
+				[9]  Lamsiyah, Salima, Abdelkader El Mahdaouy, Saïd El Alaoui Ouatik, and Bernard Espinasse. "Unsupervised extractive multi-document summarization method based on transfer learning from BERT multi-task fine-tuning." Journal of Information Science (2021): 0165551521990616.
+
+Summarization is a technique of representing the input data in the shorter version to the individuals without losing the main context of the input data \cite{1,2,3}. Most of the existing summarization techniques focus on single-modal summarization (SS) techniques such as the text-based summarization or the image-based summarization.  In the SS techniques, the input data and the output summary are of same modality \cite{4,5,6,7}. However, we can find that the individuals use the multi-modal data (such as audio, image, text, video) to increase the clarity of the topic \cite{8,9}. As a result, the existing SS techniques fail to generate qualitative summary from the multi-modal input (MI) data (a.k.a. input data which contains multi-modal data). To overcome these limitations, researchers proposed the multi-modal summarization (MS) techniques \cite{10,11,12,13} for summarizing the MI data. The MS techniques generate the output summary by extracting the latent features from the MI data. In this paper, we focus on generating MS from the MI data which consists of image and the textual data.
+\end{comment}
+\end{document} 
+			
